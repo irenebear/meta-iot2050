@@ -125,6 +125,8 @@ jobs:
         run: |
           wget https://github.com/aboutcode-org/scancode-toolkit/releases/download/v32.4.1/scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
           tar -xzf scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
+          # Remove the downloaded tarball to avoid wildcard collisions with directory names.
+          rm -f scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
 
       # Configure ScanCode. Without running the configure script, ScanCode
       # attempts to install its wheel dependencies when first invoked and
@@ -133,14 +135,16 @@ jobs:
       # dependencies so that the scancode command works correctly【443920176428260†L424-L455】.
       - name: Configure ScanCode Toolkit
         run: |
-          cd scancode-toolkit-* && ./configure
+          # Use a trailing slash in the wildcard so that only directories are matched
+          cd scancode-toolkit-*/ && ./configure
 
       # Generate the SPDX SBOM using ScanCode. We change into the extracted
       # directory before invoking the scancode command so it can locate its
       # dependencies, and we output the SBOM back to the workspace root.
       - name: Generate SBOM with ScanCode Toolkit
         run: |
-          cd scancode-toolkit-* && \
+          # Change into the extracted directory (trailing slash restricts match to directories)
+          cd scancode-toolkit-*/ && \
             ./scancode \
               --license --package --copyright --info \
               --format spdx-spdx2.2 \
