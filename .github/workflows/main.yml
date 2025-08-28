@@ -110,23 +110,33 @@ jobs:
 
       - name: Free Disk Space
         uses: ./.github/workflows/free-disk-space
-        
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-          
-      - name: Download and setup ScanCode Toolkit
-        run: |        
+
+      - name: Download and extract ScanCode Toolkit
+        run: |
           wget https://github.com/aboutcode-org/scancode-toolkit/releases/download/v32.4.1/scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
           tar -xzf scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
-        
+          # Enter the extracted directory for everything else
+          cd scancode-toolkit-v32.4.1_py3.10-linux
+          ls -l
+
+      - name: Configure ScanCode Toolkit
+        run: |
+          cd scancode-toolkit-v32.4.1
+          ./configure
+          ls -l bin
+
       - name: Generate SBOM with ScanCode Toolkit
         run: |
-          ./scancode-toolkit-*/scancode \
+          cd scancode-toolkit-32.4.1_py3.10-linux
+          ./bin/scancode \
             --license --package --copyright --info \
             --format spdx-spdx2.2 \
-            --output sbom-scancode.spdx .
+            --output ../sbom-scancode.spdx ..
 
       - name: Download and setup OSS Review Toolkit (ORT)
         run: |
@@ -135,7 +145,6 @@ jobs:
       - name: Generate SBOM with OSS Review Toolkit (ORT)
         run: |
           java -jar ort.jar analyze -i . -o ort-result
-          # ORT结果生成的 SPDX 文件
           if [ -f ort-result/analyzer/result.spdx.yml ]; then
             cp ort-result/analyzer/result.spdx.yml sbom-ort.spdx.yml
           fi
