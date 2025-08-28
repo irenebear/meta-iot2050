@@ -147,14 +147,15 @@ jobs:
       # dependencies, and we output the SBOM back to the workspace root.
       - name: Generate SBOM with ScanCode Toolkit
         run: |
-          # Change into the extracted directory (trailing slash restricts match to directories)
-          # Use one of ScanCode's built-in SPDX output options (`--spdx-tv`).
-          # Ignore the ScanCode directory itself so it isn’t scanned.
+         # Change into the extracted directory; use SPDX Tag/Value output.
+         # Ignore the ScanCode directory itself to prevent scanning its own files.
+         # Save all scan output (including errors) to scancode-scan.log for review.
           cd scancode-toolkit-*/ && \
             ./scancode \
               --license --package --copyright --info \
               --ignore "scancode-toolkit-*" \
-              --spdx-tv ../sbom-scancode.spdx ..
+              --spdx-tv ../sbom-scancode.spdx .. \
+              2>&1 | tee ../scancode-scan.log
 
       # Download the OSS Review Toolkit (ORT) executable. ORT is used as an
       # alternative SBOM generator; it does not depend on the ScanCode
@@ -181,3 +182,4 @@ jobs:
           path: |
             sbom-scancode.spdx
             sbom-ort.spdx.yml
+            scancode-scan.log
