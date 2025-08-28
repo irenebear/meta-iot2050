@@ -113,15 +113,14 @@ jobs:
 
       - name: Download and setup ScanCode Toolkit
         run: |
-        # Get latest linux tarball asset url
-        url=$(curl -s https://api.github.com/repos/aboutcode-org/scancode-toolkit/releases/latest \
-        | grep "browser_download_url.*linux.tar.gz" \
-        | cut -d '"' -f 4)
-        wget -O scancode-toolkit.tar.gz "$url"
-        tar -xzf scancode-toolkit.tar.gz
-        # Find the extracted folder name and rename to scancode-toolkit (optional)
-        folder=$(tar -tzf scancode-toolkit.tar.gz | head -1 | cut -f1 -d"/")
-        mv "$folder" scancode-toolkit
+         url=$(curl -s https://api.github.com/repos/aboutcode-org/scancode-toolkit/releases/latest \
+         | grep "browser_download_url.*linux.tar.gz" \
+         | cut -d '"' -f 4)
+          wget -O scancode-toolkit.tar.gz "$url"
+          tar -xzf scancode-toolkit.tar.gz
+          # Find the extracted folder name and rename to scancode-toolkit (optional)
+          folder=$(tar -tzf scancode-toolkit.tar.gz | head -1 | cut -f1 -d"/")
+          mv "$folder" scancode-toolkit
 
       - name: Generate SBOM with ScanCode Toolkit
         run: |
