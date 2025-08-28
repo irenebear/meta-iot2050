@@ -112,14 +112,10 @@ jobs:
         uses: ./.github/workflows/free-disk-space
 
       - name: Download and setup ScanCode Toolkit
-        run: |
-         url=$(curl -s https://api.github.com/repos/aboutcode-org/scancode-toolkit/releases/latest \
-         | grep "browser_download_url.*linux.tar.gz" \
-         | cut -d '"' -f 4)
-          wget -O scancode-toolkit.tar.gz "$url"
-          tar -xzf scancode-toolkit.tar.gz
-          # Find the extracted folder name and rename to scancode-toolkit (optional)
-          folder=$(tar -tzf scancode-toolkit.tar.gz | head -1 | cut -f1 -d"/")
+        run: |        
+          wget https://github.com/aboutcode-org/scancode-toolkit/releases/download/v32.4.1/scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
+          tar -xzf scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
+          folder=$(tar -tzf scancode-toolkit-v32.4.1_py3.10-linux.tar.gz | head -1 | cut -f1 -d"/")
           mv "$folder" scancode-toolkit
 
       - name: Generate SBOM with ScanCode Toolkit
