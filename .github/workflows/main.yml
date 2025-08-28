@@ -100,3 +100,46 @@ jobs:
         with:
           name: iot2050-bootloaders
           path: build/tmp/deploy/images/iot2050/*.bin
+
+  oss-clearing-sbom:
+    name: OSS Clearing SBOM
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Free Disk Space
+        uses: ./.github/workflows/free-disk-space
+
+      - name: Download and setup ScanCode Toolkit
+        run: |
+          wget -O scancode-toolkit.zip https://github.com/nexB/scancode-toolkit/releases/latest/download/scancode-toolkit-*-linux.zip
+          unzip scancode-toolkit.zip
+          mv scancode-toolkit-* scancode-toolkit
+
+      - name: Generate SBOM with ScanCode Toolkit
+        run: |
+          ./scancode-toolkit/scancode \
+            --license --package --copyright --info \
+            --format spdx-spdx2.2 \
+            --output sbom-scancode.spdx .
+
+      - name: Download and setup OSS Review Toolkit (ORT)
+        run: |
+          wget https://github.com/oss-review-toolkit/ort/releases/latest/download/ort-standalone.jar -O ort.jar
+
+      - name: Generate SBOM with OSS Review Toolkit (ORT)
+        run: |
+          java -jar ort.jar analyze -i . -o ort-result
+          # ORT结果生成的 SPDX 文件
+          if [ -f ort-result/analyzer/result.spdx.yml ]; then
+            cp ort-result/analyzer/result.spdx.yml sbom-ort.spdx.yml
+          fi
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: oss-sbom-results
+          path: |
+            sbom-scancode.spdx
+            sbom-ort.spdx.yml
