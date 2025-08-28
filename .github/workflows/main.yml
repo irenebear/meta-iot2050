@@ -116,27 +116,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Download and extract ScanCode Toolkit
+      - name: Download and setup ScanCode Toolkit
         run: |
           wget https://github.com/aboutcode-org/scancode-toolkit/releases/download/v32.4.1/scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
           tar -xzf scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
-          # Enter the extracted directory for everything else
-          cd scancode-toolkit-v32.4.1_py3.10-linux
-          ls -l
-
-      - name: Configure ScanCode Toolkit
-        run: |
-          cd scancode-toolkit-v32.4.1
-          ./configure
-          ls -l bin
 
       - name: Generate SBOM with ScanCode Toolkit
         run: |
-          cd scancode-toolkit-32.4.1_py3.10-linux
-          ./bin/scancode \
+          ./scancode-toolkit-*/scancode \
             --license --package --copyright --info \
             --format spdx-spdx2.2 \
-            --output ../sbom-scancode.spdx ..
+            --output sbom-scancode.spdx .
 
       - name: Download and setup OSS Review Toolkit (ORT)
         run: |
