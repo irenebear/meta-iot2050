@@ -1,58 +1,33 @@
-name: CI
+name: CI/CD Pipeline # 整个工作流的名称，更具描述性
 
 on:
-  workflow_dispatch:
-    inputs:
-      build_debian_example_image:
-        description: 'Build Debian example image'
-        required: false
-        default: true
-        type: boolean
-      build_debian_swupdate_image:
-        description: 'Build Debian secure boot SWUpdate image'
-        required: false
-        default: true
-        type: boolean
-      build_bootloaders:
-        description: 'Build bootloaders'
-        required: false
-        default: true
-        type: boolean
   push:
     branches:
-      - master
+      - main # 监听 main 分支的 push 事件 (或您的主要开发分支，例如 master, develop)
+      - '*' # 监听所有分支的 push 事件，如果不需要，可以删除或指定特定分支
     tags:
-      - '*'
-    paths-ignore:
-      - '**.md'
-  pull_request:
-    branches:
-      - master
-    types:
-      - opened
-      - synchronize
-      - reopened
-    paths-ignore:
-      - '**.md'
+      - 'v*' # 监听所有以 'v' 开头的标签 (例如 v1.0.0, v2.1) 的 push 事件，这通常用于发布和生成 SBOM
+  workflow_dispatch: # 允许在 GitHub UI 中手动触发此工作流
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # --- 图像构建相关的 Jobs ---
+
   debian-example-image:
-    name: Debian example image
+    name: Debian Example Image Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Free Disk Space
-        uses: ./.github/workflows/free-disk-space
-      - name: Build image
-        run: |
-          ./kas-container build kas-iot2050-example.yml
-          ./kas-container build kas-iot2050-example.yml:kas-iot2050-qemu.yml
-      - name: Upload image
+      - name: Free Disk Space (Custom Action)
+        # 请确保您的 .github/workflows/free-disk-space.yml 文件存在且内容正确
+        uses: ./.github/workflows/free-disk-space.yml
+      - name: Build Example Image
+        run: ./kas-container build kas-iot2050-example.yml
+      - name: Upload Example Image Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: iot2050-example-image
@@ -61,23 +36,21 @@ jobs:
             build/tmp/deploy/images/iot2050/iot2050-image-example-iot2050-debian-iot2050.wic.bmap
 
   debian-swupdate-image:
-    name: Debian secure boot SWUpdate image
+    name: Debian Secure Boot SWUpdate Image Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Free Disk Space
-        uses: ./.github/workflows/free-disk-space
-      - name: Mock EIO binary stubs
+      - name: Free Disk Space (Custom Action)
+        uses: ./.github/workflows/free-disk-space.yml
+      - name: Mock EIO Binary Stubs
         run: |
           touch ./recipes-app/iot2050-eio-manager/files/bin/iot2050-eiofsd
           touch ./recipes-app/iot2050-eio-manager/files/bin/map3-fw.bin
           touch ./recipes-app/iot2050-eio-manager/files/bin/firmware-version
-      - name: Build image
-        run: |
-          ./kas-container build kas-iot2050-swupdate.yml:kas/opt/secure-boot.yml:kas/opt/preempt-rt.yml:kas/opt/eio.yml:kas/opt/module.yml:kas/opt/meta-hailo.yml
-          ./kas-container build kas-iot2050-swupdate.yml:kas-iot2050-qemu.yml
-      - name: Upload image
+      - name: Build SWUpdate Image
+        run: ./kas-container build kas-iot2050-swupdate.yml:kas/opt/secure-boot.yml:kas/opt/preempt-rt.yml:kas/opt/eio.yml
+      - name: Upload SWUpdate Image Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: iot2050-secureboot-swu-image
@@ -86,17 +59,64 @@ jobs:
             build/tmp/deploy/images/iot2050/iot2050-image-swu-example-iot2050-debian-iot2050.wic.bmap
 
   bootloaders:
-    name: Bootloaders
+    name: Bootloaders Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Free Disk Space
-        uses: ./.github/workflows/free-disk-space
-      - name: Build bootloader image
+      - name: Free Disk Space (Custom Action)
+        uses: ./.github/workflows/free-disk-space.yml
+      - name: Build Bootloader Image
         run: ./kas-container build kas-iot2050-boot.yml
-      - name: Archive bootloaders
+      - name: Archive Bootloaders Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: iot2050-bootloaders
           path: build/tmp/deploy/images/iot2050/*.bin
+
+  # --- OSS Clearing 和 SBOM 生成的 Job ---
+  oss-clearing:
+    name: OSS Clearing (SBOM Generation)
+    runs-on: ubuntu-latest
+    # 这个 Job 将在以下情况下运行：
+    # 1. 手动触发 (workflow_dispatch)
+    # 2. 推送任何以 'v' 开头的标签 (例如 v1.0.0, v2.1)
+    # 如果您希望它在每次代码推送时都运行，请删除下面的 'if' 条件。
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout Repository (with submodules for full context)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive # 确保克隆所有子模块，以便全面扫描
+
+      - name: ScanCode (File-level Evidence)
+        # 这是正确的 Action 引用。如果再次遇到 'repository not found' 错误，
+        # 很有可能是 GitHub 服务端的瞬时问题，请尝试重新运行工作流。
+        uses: nexB/scancode-toolkit-action@v2
+        with:
+          args: >
+            --copyright
+            --license
+            --license-text
+            --info
+            --json-pp scancode-output.json
+            . # 扫描当前目录 (仓库根目录)
+
+      - name: ORT Analyze + Scan + Report (SBOM Generation)
+        # 这也是正确的 Action 引用。同上，如果报错，请尝试重新运行。
+        uses: oss-review-toolkit/ort-action@v1
+        with:
+          args: >
+            analyze -i . -o ort-results &&
+            scan -i ort-results/analyzer-result.yml -o ort-results &&
+            report -i ort-results/*-result.yml -o ort-results
+            -f SpdxDocument,NoticeTemplate,PlainTextTemplate # 生成 SPDX 和 Notice 文件
+
+      - name: Upload SBOM Artifacts (SPDX & NOTICE)
+        uses: actions/upload-artifact@v4
+        with:
+          # 根据标签名称或运行 ID 命名 Artifact，以便于识别
+          name: clearing-artifacts-v${{ github.ref_name || github.run_id }}
+          path: |
+            scancode-output.json
+            ort-results/report/** # 上传所有生成的报告文件
