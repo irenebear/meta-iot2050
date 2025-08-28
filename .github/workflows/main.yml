@@ -120,12 +120,10 @@ jobs:
         run: |        
           wget https://github.com/aboutcode-org/scancode-toolkit/releases/download/v32.4.1/scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
           tar -xzf scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
-          folder=$(tar -tzf scancode-toolkit-v32.4.1_py3.10-linux.tar.gz | head -1 | cut -f1 -d"/")
-          mv "$folder" scancode-toolkit
-
+        
       - name: Generate SBOM with ScanCode Toolkit
         run: |
-          ./scancode-toolkit/scancode \
+          ./scancode-toolkit-*/scancode \
             --license --package --copyright --info \
             --format spdx-spdx2.2 \
             --output sbom-scancode.spdx .
