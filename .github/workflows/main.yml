@@ -147,13 +147,11 @@ jobs:
       # dependencies, and we output the SBOM back to the workspace root.
       - name: Generate SBOM with ScanCode Toolkit
         run: |
-          # Change into the extracted directory (trailing slash restricts match to directories)
-           cd scancode-toolkit-*/ && \
-             ./scancode \
-               --license --package --copyright --info \
-               --format spdx-spdx2.2 \
-               --output ../sbom-scancode.spdx ..
-               --spdx-tv ../sbom-scancode.spdx ..
+         cd scancode-toolkit-*/ && \
+         ./scancode \
+         --license --package --copyright --info \
+         --spdx-tv ../sbom-scancode.spdx ..
+
       # Download the OSS Review Toolkit (ORT) executable. ORT is used as an
       # alternative SBOM generator; it does not depend on the ScanCode
       # release and is downloaded separately.
