@@ -135,8 +135,12 @@ jobs:
       # dependencies so that the scancode command works correctly【443920176428260†L424-L455】.
       - name: Configure ScanCode Toolkit
         run: |
-          # Use a trailing slash in the wildcard so that only directories are matched
-          cd scancode-toolkit-*/ && ./configure
+          # Use a trailing slash in the wildcard so that only directories are matched.
+          # Specify the Python interpreter explicitly so that configure creates the
+          # virtual environment with the same Python version set up by actions/setup-python.
+          # The $pythonLocation environment variable is provided by setup-python and
+          # points to the root of the installed Python; we append /bin/python.
+          cd scancode-toolkit-*/ && ./configure --python "$pythonLocation/bin/python"
 
       # Generate the SPDX SBOM using ScanCode. We change into the extracted
       # directory before invoking the scancode command so it can locate its
