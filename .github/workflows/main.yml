@@ -116,22 +116,45 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Download and setup ScanCode Toolkit
+      # Download the ScanCode Toolkit release archive. This step retrieves the
+      # tarball for the selected version and extracts it locally. The official
+      # documentation advises extracting the archive and then running the
+      # configure script inside the extracted directory to prepare ScanCode’s
+      # virtual environment and install its Python dependencies【443920176428260†L424-L455】.
+      - name: Download ScanCode Toolkit
         run: |
           wget https://github.com/aboutcode-org/scancode-toolkit/releases/download/v32.4.1/scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
           tar -xzf scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
 
+      # Configure ScanCode. Without running the configure script, ScanCode
+      # attempts to install its wheel dependencies when first invoked and
+      # fails because the wildcard argument does not match any files. Running
+      # configure creates a virtual environment and installs the required
+      # dependencies so that the scancode command works correctly【443920176428260†L424-L455】.
+      - name: Configure ScanCode Toolkit
+        run: |
+          cd scancode-toolkit-* && ./configure
+
+      # Generate the SPDX SBOM using ScanCode. We change into the extracted
+      # directory before invoking the scancode command so it can locate its
+      # dependencies, and we output the SBOM back to the workspace root.
       - name: Generate SBOM with ScanCode Toolkit
         run: |
-          ./scancode-toolkit-*/scancode \
-            --license --package --copyright --info \
-            --format spdx-spdx2.2 \
-            --output sbom-scancode.spdx .
+          cd scancode-toolkit-* && \
+            ./scancode \
+              --license --package --copyright --info \
+              --format spdx-spdx2.2 \
+              --output ../sbom-scancode.spdx ..
 
+      # Download the OSS Review Toolkit (ORT) executable. ORT is used as an
+      # alternative SBOM generator; it does not depend on the ScanCode
+      # release and is downloaded separately.
       - name: Download and setup OSS Review Toolkit (ORT)
         run: |
           wget https://github.com/oss-review-toolkit/ort/releases/latest/download/ort-standalone.jar -O ort.jar
 
+      # Run ORT to generate an SPDX file. If ORT produces a result file in
+      # YAML format, copy it to the expected location for upload.
       - name: Generate SBOM with OSS Review Toolkit (ORT)
         run: |
           java -jar ort.jar analyze -i . -o ort-result
@@ -139,6 +162,8 @@ jobs:
             cp ort-result/analyzer/result.spdx.yml sbom-ort.spdx.yml
           fi
 
+      # Upload the generated SBOM artifacts. Both ScanCode and ORT results
+      # are included in the artifact to aid in further processing.
       - name: Upload SBOM artifacts
         uses: actions/upload-artifact@v4
         with:
