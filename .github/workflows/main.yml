@@ -116,6 +116,17 @@ jobs:
         with:
           python-version: '3.10'
 
+      # Install a JDK and set JAVA_HOME.  The ORT binary distribution
+      # requires a working Java runtime; the 'Free Disk Space' step
+      # removes the pre-installed JDK on the runner, so we need to
+      # explicitly install one here.  Using actions/setup-java ensures
+      # JAVA_HOME points to the installed Temurin JDK.
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
       # Download the ScanCode Toolkit release archive. This step retrieves the
       # tarball for the selected version and extracts it locally. The official
       # documentation advises extracting the archive and then running the
@@ -180,17 +191,11 @@ jobs:
       # `ort-dist` for consistent naming.
       - name: Download and setup OSS Review Toolkit (ORT)
         run: |
-          # Determine the latest ORT version tag via the GitHub API.  We
-          # parse the JSON response using Python, which is always
-          # available in the GitHub Actions runner.
-          ORT_VERSION=$(curl -s https://api.github.com/repos/oss-review-toolkit/ort/releases/latest | python -c "import sys, json; print(json.load(sys.stdin)['tag_name'])")
-          echo "Latest ORT version is $ORT_VERSION"
-          # Download the binary distribution zip for the latest release.
+          # Use a fixed version of ORT for stability.  Version 66.0.3
+          # provides a binary distribution as a zip file containing
+          # executables in its `bin` directory【825930044113174†L71-L83】.
+          ORT_VERSION="66.0.3"
           wget "https://github.com/oss-review-toolkit/ort/releases/download/${ORT_VERSION}/ort-${ORT_VERSION}.zip" -O ort.zip
-          # Extract the archive.  The extracted folder is named
-          # `ort-${ORT_VERSION}`, so rename it to `ort-dist` for
-          # predictable referencing.  We remove the zip afterwards to
-          # conserve disk space.
           unzip -q ort.zip
           rm ort.zip
           mv ort-${ORT_VERSION} ort-dist
