@@ -194,11 +194,10 @@ jobs:
           # Use a fixed version of ORT for stability.  Version 66.0.3
           # provides a binary distribution as a zip file containing
           # executables in its `bin` directory【825930044113174†L71-L83】.
-          ORT_VERSION="66.0.3"
-          wget "https://github.com/oss-review-toolkit/ort/releases/download/${ORT_VERSION}/ort-${ORT_VERSION}.zip" -O ort.zip
+          wget "https://github.com/oss-review-toolkit/ort/releases/download/66.0.3/orth-66.0.3.zip" -O ort.zip
           unzip -q ort.zip
           rm ort.zip
-          mv ort-${ORT_VERSION} ort-dist
+          mv orth-66.0.3 ort-dist
 
       # Run ORT to generate an SPDX file.  We invoke the `ort`
       # executable from the extracted distribution.  ORT's `analyze`
