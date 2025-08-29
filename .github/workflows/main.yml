@@ -101,8 +101,10 @@ jobs:
           name: iot2050-bootloaders
           path: build/tmp/deploy/images/iot2050/*.bin
 
+
+
   oss-clearing-sbom:
-    name: OSS Clearing SBOM
+    name: OSS Clearing SBOM (ScanCode only)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -116,62 +118,18 @@ jobs:
         with:
           python-version: '3.10'
 
-      # Install a JDK and set JAVA_HOME.  The ORT binary distribution
-      # requires a working Java runtime; the 'Free Disk Space' step
-      # removes the pre-installed JDK on the runner, so we need to
-      # explicitly install one here.  Using actions/setup-java ensures
-      # JAVA_HOME points to the installed Temurin JDK.
-      - name: Set up Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '17'
-
-      # Download the ScanCode Toolkit release archive. This step retrieves the
-      # tarball for the selected version and extracts it locally. The official
-      # documentation advises extracting the archive and then running the
-      # configure script inside the extracted directory to prepare ScanCode’s
-      # virtual environment and install its Python dependencies【443920176428260†L424-L455】.
       - name: Download ScanCode Toolkit
         run: |
           wget https://github.com/aboutcode-org/scancode-toolkit/releases/download/v32.4.1/scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
           tar -xzf scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
-          # Remove the downloaded tarball to avoid wildcard collisions with directory names.
           rm -f scancode-toolkit-v32.4.1_py3.10-linux.tar.gz
 
-      # Configure ScanCode. Without running the configure script, ScanCode
-      # attempts to install its wheel dependencies when first invoked and
-      # fails because the wildcard argument does not match any files. Running
-      # configure creates a virtual environment and installs the required
-      # dependencies so that the scancode command works correctly【443920176428260†L424-L455】.
       - name: Configure ScanCode Toolkit
         run: |
-          # Use a trailing slash in the wildcard so that only directories are matched.
-          # Specify the Python interpreter explicitly so that configure creates the
-          # virtual environment with the same Python version set up by actions/setup-python.
-          # The $pythonLocation environment variable is provided by setup-python and
-          # points to the root of the installed Python; we append /bin/python.
           cd scancode-toolkit-*/ && ./configure --python "$pythonLocation/bin/python"
 
-      # Generate the SPDX SBOM using ScanCode. We change into the extracted
-      # directory before invoking the scancode command so it can locate its
-      # dependencies, and we output the SBOM back to the workspace root.
       - name: Generate SBOM with ScanCode Toolkit
         run: |
-          # Change into the extracted directory (trailing slash restricts match to directories)
-          # Use one of ScanCode's built‑in SPDX output options. The `--format` option
-          # previously used is no longer supported; instead we use `--spdx-tv` to
-          # write an SPDX Tag/Value document, which conforms to SPDX v2.2. We also
-          # ignore the ScanCode directory itself when scanning to prevent ScanCode
-          # from scanning its own virtual environment and bundled files. Without
-          # ignoring this directory, ScanCode scans its own files and may report
-          # errors for them, which causes the scan to exit with a non‑zero
-          # return code. The `--ignore` option accepts a glob pattern relative to
-          # the scan root, so `scancode-toolkit-*` matches the extracted
-          # ScanCode directory and excludes it from the scan【290068203880046†L82-L96】.
-          # We capture the full scan log to a file using `tee` so any scan
-          # warnings or errors are saved for later inspection. This log will be
-          # uploaded alongside the SBOM artifact.
           cd scancode-toolkit-*/ && \
             ./scancode \
               --license --package --copyright --info \
@@ -179,52 +137,30 @@ jobs:
               --spdx-tv ../sbom-scancode.spdx .. \
               2>&1 | tee ../scancode-scan.log
 
-      # Download and set up the OSS Review Toolkit (ORT).  Recent
-      # versions of ORT no longer ship a single "standalone" JAR file.
-      # Instead, the binary distribution of ORT is provided as a zip
-      # archive (ort-[version].zip).  According to the official
-      # installation guide, this zip contains executables under the
-      # `bin` directory; on Linux the tool can be invoked via
-      # `bin/ort`【825930044113174†L71-L83】.  The latest release tag is
-      # obtained via the GitHub API so the workflow always uses the
-      # most recent version.  The archive is then extracted to
-      # `ort-dist` for consistent naming.
-      - name: Download and setup OSS Review Toolkit (ORT)
-        run: |
-          # Use a fixed version of ORT for stability.  Version 66.0.3
-          # provides a binary distribution as a zip file containing
-          # executables in its `bin` directory【825930044113174†L71-L83】.
-          wget "https://github.com/oss-review-toolkit/ort/releases/download/66.0.3/orth-66.0.3.zip" -O ort.zip
-          unzip -q ort.zip
-          rm ort.zip
-          mv orth-66.0.3 ort-dist
-
-      # Run ORT to generate an SPDX file.  We invoke the `ort`
-      # executable from the extracted distribution.  ORT's `analyze`
-      # command scans the repository and produces various outputs in
-      # the specified result directory.  If ORT generates an SPDX
-      # document (in SPDX YAML format), copy it into the workspace so
-      # that it can be uploaded as an artifact.
-      - name: Generate SBOM with OSS Review Toolkit (ORT)
-        run: |
-          # Run the ORT analysis.  ORT writes results into the
-          # `ort-result` directory.  Passing the current directory (.)
-          # as input instructs ORT to analyze all files in the
-          # repository.
-          ./ort-dist/bin/ort analyze -i . -o ort-result
-          # If ORT produced an SPDX file, copy it to a stable
-          # filename for upload.
-          if [ -f ort-result/analyzer/result.spdx.yml ]; then
-            cp ort-result/analyzer/result.spdx.yml sbom-ort.spdx.yml
-          fi
-
-      # Upload the generated SBOM artifacts. Both ScanCode and ORT results
-      # are included in the artifact to aid in further processing.
-      - name: Upload SBOM artifacts
+      - name: Upload ScanCode SBOM artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: oss-sbom-results
+          name: scancode-sbom-results
           path: |
             sbom-scancode.spdx
-            sbom-ort.spdx.yml
             scancode-scan.log
+
+  ort:
+    name: OSS Clearing SBOM (ORT)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use HTTPS instead of SSH for Git cloning
+        run: git config --global url.https://github.com/.insteadOf ssh://git@github.com/
+      - name: Checkout project
+        uses: actions/checkout@v4
+      - name: Run ORT Scan
+        uses: oss-review-toolkit/ort-ci-github-action@v1
+      - name: Upload ORT results
+        uses: actions/upload-artifact@v4
+        with:
+          name: ort-results
+          path: |
+            ort-results/**/*
+
+
+
