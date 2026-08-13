@@ -25,6 +25,7 @@ SRC_URI = " \
     file://www/app.css \
     file://www/app.js \
     file://www/favicon.ico \
+    file://www/siemens-logo.svg \
     file://www/locale.js \
     file://i18n/catalog.json \
     file://i18n/generate-po-bundles.py \
@@ -48,6 +49,7 @@ do_install() {
     install -m 644 ${WORKDIR}/www/app.js ${D}/usr/share/iot2050-firstboot-onboarding/
     install -m 644 ${WORKDIR}/www/locale.js ${D}/usr/share/iot2050-firstboot-onboarding/
     install -m 644 ${WORKDIR}/www/favicon.ico ${D}/usr/share/iot2050-firstboot-onboarding/favicon.ico
+    install -m 644 ${WORKDIR}/www/siemens-logo.svg ${D}/usr/share/iot2050-firstboot-onboarding/siemens-logo.svg
     PYTHONDONTWRITEBYTECODE=1 python3 -B ${WORKDIR}/i18n/generate-po-bundles.py \
         --source ${WORKDIR}/i18n/catalog.json \
         --output-dir ${D}/usr/share/iot2050-firstboot-onboarding

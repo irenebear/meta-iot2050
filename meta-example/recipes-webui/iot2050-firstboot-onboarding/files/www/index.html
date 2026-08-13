@@ -9,14 +9,18 @@
       document.documentElement.dataset.view = 'setup';
     }());
   </script>
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  <link rel="stylesheet" href="/app.css">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="stylesheet" href="app.css">
 </head>
 <body>
   <main class="app-shell">
     <section class="setup-card" id="setup-view">
       <div class="surface-main">
         <div class="setup-header">
+          <div class="product-brand" aria-label="SIEMENS SIMATIC IOT2050">
+            <img src="siemens-logo.svg" alt="" aria-hidden="true">
+            <span class="product-name">SIMATIC IOT2050</span>
+          </div>
           <h1 id="setup-title">Create your account</h1>
         </div>
 
@@ -84,7 +88,10 @@
         <div class="spinner-shell" aria-hidden="true">
           <div class="spinner-ring"></div>
         </div>
-        <div class="product-brand product-brand-wait">IOT2050</div>
+        <div class="product-brand product-brand-wait">
+          <img src="siemens-logo.svg" alt="" aria-hidden="true">
+          <span class="product-name">SIMATIC IOT2050</span>
+        </div>
         <p class="eyebrow wait-eyebrow" id="wait-eyebrow" hidden></p>
         <h2 id="wait-title">Applying your configuration</h2>
         <p class="wait-copy" id="wait-copy" hidden></p>
@@ -101,8 +108,8 @@
     </section>
   </main>
 
-  <script src="/locale.js"></script>
-  <script src="/po.js"></script>
-  <script src="/app.js" defer></script>
+  <script src="locale.js"></script>
+  <script src="po.js"></script>
+  <script src="app.js" defer></script>
 </body>
 </html>

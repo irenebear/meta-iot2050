@@ -37,6 +37,7 @@ const CONTENT_TYPES = {
   '.js': 'application/javascript; charset=utf-8',
   '.json': 'application/json; charset=utf-8',
   '.ico': 'image/x-icon',
+  '.svg': 'image/svg+xml',
 };
 
 const LOCALE_ALIASES = {
