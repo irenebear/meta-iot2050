@@ -1,13 +1,157 @@
 /* SPDX-License-Identifier: LGPL-2.1-or-later */
-/*
- * IOT2050 Cockpit branding overrides.
- *
- * Hide "Other options" (SSH to remote host) on the login page.
- * This feature is not applicable on an embedded device where
- * users always connect locally.
- */
+/* IOT2050 branding; Cockpit owns shell light/dark colors. */
+
+/* Login page: keep the logo and product name in one horizontal brand row.
+ * Cockpit's #badge normally occupies a separate side grid area, so it is not
+ * used here. */
+#badge {
+    display: none !important;
+}
+
+h1#brand {
+    position: relative;
+    display: block !important;
+    inline-size: 100%;
+    min-block-size: 20px;
+    margin: -12px auto 0;
+    padding: 0 0 10px !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    color: var(--color-text, #151515);
+    font-size: 14px !important;
+    font-weight: 600;
+    line-height: 20px;
+    letter-spacing: .02em;
+    text-transform: none;
+    text-align: end;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--color-border, #d2d2d2);
+}
+
+#login-note {
+    margin-block: 28px 16px !important;
+    font-size: 0;
+}
+
+#login-note::after {
+    content: "Log in with your user account.";
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+h1#brand::before {
+    content: "SIMATIC IOT2050";
+    display: none !important;
+}
+
+h1#brand::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: -16px;
+    inset-block-start: 50%;
+    inline-size: 116px;
+    block-size: 20px;
+    transform: translateY(-50%);
+    background-color: #009999;
+    -webkit-mask: url("siemens-logo.svg") center / 100% 100% no-repeat;
+    mask: url("siemens-logo.svg") center / 100% 100% no-repeat;
+}
+
+/* The authenticated shell renders the brand before account@host. */
+#hosts-sel {
+    display: grid;
+    align-items: center;
+    grid-template-columns: 88px auto;
+    grid-template-rows: 20px 16px;
+}
+
+#hosts-sel::before {
+    content: "SIMATIC IOT2050";
+    display: block;
+    flex: 0 0 auto;
+    grid-column: 1;
+    grid-row: 2;
+    padding: 0;
+    color: inherit;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 16px;
+    letter-spacing: .03em;
+    white-space: nowrap;
+}
+
+#hosts-sel::after {
+    content: "";
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+    flex: 0 0 auto;
+    inline-size: 88px;
+    block-size: 20px;
+    background-color: #009999;
+    -webkit-mask: url("siemens-logo.svg") center / 100% 100% no-repeat;
+    mask: url("siemens-logo.svg") center / 100% 100% no-repeat;
+}
+
+#hosts-sel > * {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    margin-inline-start: 6px;
+    align-self: center;
+}
+
+#hosts-sel .ct-switcher-localonly,
+#hosts-sel #host-toggle {
+    align-self: center;
+    color: inherit;
+}
+
+/* The host switcher itself remains unchanged and follows the brand. */
+#hosts-sel .ct-switcher-localonly,
+#host-toggle {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+#hosts-sel .ct-switcher-localonly::before,
+#host-toggle::before {
+    display: none !important;
+}
+
+@media (max-width: 767px) {
+    #hosts-sel::before {
+        font-size: 9px;
+    }
+
+    h1#brand {
+        font-size: 13px !important;
+        line-height: 18px;
+        min-block-size: 18px;
+        margin-block-start: -4px;
+        padding-block: 0 8px !important;
+    }
+
+    h1#brand::after {
+        inset-inline-start: -10px;
+        inline-size: 102px;
+        block-size: 18px;
+    }
+
+    #hosts-sel::after {
+        inline-size: 72px;
+    }
+}
+
 #option-group,
 #show-other-login-options,
 #show-other-login-options-text {
     display: none !important;
+}
+
+html,
+body {
+    font-family: "Siemens Sans", system-ui, sans-serif;
 }

@@ -24,6 +24,7 @@ SRC_URI = " \
     file://iot2050-board-marker.service \
     file://postinst \
     file://branding.css \
+    file://siemens-logo.svg \
     "
 
 do_install() {
@@ -60,4 +61,6 @@ do_install() {
 
     install -d -m 755 ${D}/usr/share/cockpit/branding/default
     install -m 644 ${WORKDIR}/branding.css ${D}/usr/share/cockpit/branding/default/branding.css
+    install -m 644 ${WORKDIR}/siemens-logo.svg ${D}/usr/share/cockpit/branding/debian/siemens-logo.svg
+    install -m 644 ${WORKDIR}/siemens-logo.svg ${D}/usr/share/cockpit/branding/default/siemens-logo.svg
 }
