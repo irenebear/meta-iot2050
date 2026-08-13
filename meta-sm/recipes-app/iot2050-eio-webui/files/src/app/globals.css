@@ -2,6 +2,21 @@ html,
 body {
   margin: 0;
   padding: 0;
+  background: #f4f6f7;
+  color: #172025;
+  font-family: "Siemens Sans", system-ui, sans-serif;
+  color-scheme: light;
+}
+
+:root.pf-v6-theme-dark,
+:root[data-cockpit-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root.pf-v6-theme-dark body,
+:root[data-cockpit-theme="dark"] body {
+  background: #15191c !important;
+  color: #edf3f4 !important;
 }
 
 *,

@@ -14,7 +14,6 @@ import Tabs from '@mui/material/Tabs';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import PropTypes from 'prop-types';
-import ChecklistIcon from '@mui/icons-material/Checklist';
 import { range } from 'lodash';
 import YAML from 'yaml';
 import SlotInfo from '@/components/SlotInfo';
@@ -245,21 +244,34 @@ export default function HomePage () {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#fafafa' }}>
-      <AppBar position="static" sx={{ mb: 4, bgcolor: '#007993' }}>
-        <Toolbar sx={{ backgroundColor: '#fff' }}>
-          <Box sx={{ mr: 2, display: 'flex', alignItems: 'center' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', color: 'text.primary' }}>
+      <AppBar position="static" elevation={0} sx={{ mb: 4, minHeight: 64 }}>
+        <Toolbar sx={{ minHeight: 64 }}>
+          <Box
+            component="span"
+            aria-label="SIEMENS SIMATIC IOT2050"
+            sx={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 1.5,
+              whiteSpace: 'nowrap'
+            }}
+          >
             <Box
               component="img"
-              src="./icon-siemens.svg"
-              alt="SIEMENS"
-              sx={{ height: 22 }}
+              src="icon-siemens.svg"
+              alt=""
+              aria-hidden="true"
+              sx={{ width: 130, height: 22, objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
             />
+            <Box component="span" sx={{ width: '1px', height: 22, bgcolor: 'currentColor', opacity: 0.45 }} aria-hidden="true" />
+            <Typography variant="h6" noWrap component="span" color="inherit">
+              SIMATIC IOT2050
+            </Typography>
+            <Typography variant="body2" noWrap component="span" color="inherit" sx={{ opacity: 0.8 }}>
+              EIO Config
+            </Typography>
           </Box>
-          <ChecklistIcon sx={{ color: 'black', mr: 1 }} />
-          <Typography variant="h5" noWrap component="div" color="black">
-            SIMATIC IOT2050 EIO Config
-          </Typography>
         </Toolbar>
       </AppBar>
 
@@ -276,16 +288,16 @@ export default function HomePage () {
             <input type='file' id='file' onChange={handleFileChange} ref={inputFile} style={{ display: 'none' }} />
 
             <Stack spacing={2} direction="row" justifyContent="flex-end" flexWrap="wrap" useFlexGap>
-              <Button variant="contained" onClick={importConfFile} sx={{ backgroundColor: '#007993' }}>
+              <Button variant="contained" onClick={importConfFile}>
                 <Box sx={{ textTransform: 'none' }}>Import Configuration</Box>
               </Button>
-              <Button variant="contained" onClick={exportConfigFile} sx={{ backgroundColor: '#007993' }}>
+              <Button variant="contained" onClick={exportConfigFile}>
                 <Box sx={{ textTransform: 'none' }}>Export Configuration</Box>
               </Button>
-              <Button variant="contained" onClick={deployConfToIOT} sx={{ backgroundColor: '#007993' }}>
+              <Button variant="contained" onClick={deployConfToIOT}>
                 <Box sx={{ textTransform: 'none' }}>Deploy to IOT</Box>
               </Button>
-              <Button variant="contained" onClick={retrieveConfFromIOT} sx={{ backgroundColor: '#007993' }}>
+              <Button variant="contained" onClick={retrieveConfFromIOT}>
                 <Box sx={{ textTransform: 'none' }}>Retrieve from IOT</Box>
               </Button>
             </Stack>
@@ -300,7 +312,7 @@ export default function HomePage () {
             <Divider />
 
             <Box sx={{ width: '100%' }}>
-              <AppBar position="static" sx={{ bgcolor: '#007993' }}>
+              <AppBar position="static" elevation={0}>
                 <Tabs
                   value={curSlot}
                   onChange={handleChange}
