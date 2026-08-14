@@ -83,7 +83,7 @@ jobs:
       - name: Free Disk Space
         uses: ./.github/workflows/free-disk-space
       - name: Build image
-        run: ./kas-container build kas-iot2050-example.yml:kas-iot2050-qemu.yml:kas/opt/package-lock.yml
+       run: ./kas-container build kas-iot2050-example.yml:kas/my-custom.yml:kas-iot2050-qemu.yml:kas/opt/package-lock.yml
 
   debian-swupdate-image:
     name: Debian secure boot SWUpdate image
