@@ -1,8 +1,3 @@
-```yaml
-#
-# Custom packages for my IoT2050 image
-# (c) your name, MIT License
-#
 header:
   version: 14
 
@@ -10,4 +5,3 @@ local_conf_header:
   custom-packages: |
     # open62541 (OPC UA) - Debian trixie 官方源，无需编译
     IMAGE_INSTALL:append = " libopen62541-1.4 libopen62541-1.4-dev libopen62541-1.4-tools"
-```
