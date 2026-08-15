@@ -3,5 +3,5 @@ header:
 
 local_conf_header:
   custom-packages: |
-    # open62541 (OPC UA) - Debian trixie 官方源，无需编译
-    IMAGE_INSTALL:append = " libopen62541-1.4 libopen62541-1.4-dev libopen62541-1.4-tools"
+    # open62541 (OPC UA) - Debian trixie 官方源现成包，用 IMAGE_PREINSTALL（无需 recipe）
+    IMAGE_PREINSTALL:append = " libopen62541-1.4 libopen62541-1.4-dev"
