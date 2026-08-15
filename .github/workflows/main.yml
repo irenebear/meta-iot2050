@@ -84,6 +84,13 @@ jobs:
         uses: ./.github/workflows/free-disk-space
       - name: Build image
        run: ./kas-container build kas-iot2050-example.yml:kas/my-custom.yml:kas-iot2050-qemu.yml:kas/opt/package-lock.yml
+      - name: Upload qemu image
+        uses: actions/upload-artifact@v4
+        with:
+          name: iot2050-example-qemu-image
+          path: |
+            build/tmp/deploy/images/iot2050-qemu/iot2050-image-example-iot2050-debian-iot2050-qemu.wic
+            build/tmp/deploy/images/iot2050-qemu/iot2050-image-example-iot2050-debian-iot2050-qemu-*
 
   debian-swupdate-image:
     name: Debian secure boot SWUpdate image
