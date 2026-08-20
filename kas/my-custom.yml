@@ -1,11 +1,6 @@
 header:
   version: 14
 
-repos:
-  meta-iot2050:
-    layers:
-      meta-custom:
-
 local_conf_header:
   custom-support: |
     IOT2050_CUSTOM_SUPPORT = "1"
