@@ -11,7 +11,7 @@ SUMMARY = "Industrial protocol stack packages (S7/OPC UA/Modbus/MQTT/etc.)"
 # --- OPC UA (open62541) ---
 # --- Modbus (libmodbus) ---
 # --- MQTT (mosquitto broker + paho clients) ---
-# --- Python bindings (paho-mqtt / pymodbus / asyncua / canopen / bacpypes / xknx) ---
+# --- Python bindings (paho-mqtt / pymodbus / xknx) ---
 IOT2050_META_CUSTOM_PACKAGES ?= " \
     libsnap7-1 \
     libsnap7-dev \
@@ -24,8 +24,5 @@ IOT2050_META_CUSTOM_PACKAGES ?= " \
     libpaho-mqtt-dev \
     python3-paho-mqtt \
     python3-pymodbus \
-    python3-asyncua \
-    python3-canopen \
-    python3-bacpypes \
     python3-xknx \
     "
