@@ -11,6 +11,7 @@
 
 require recipes-core/images/iot2050-image-base.bb
 require recipes-core/images/iot2050-package-selections.inc
+require recipes-core/images/meta-custom-packages.inc
 
 DESCRIPTION = "IOT2050 Debian Example Image"
 
@@ -25,6 +26,11 @@ IMAGE_PREINSTALL += " \
 IMAGE_PREINSTALL += "${@ ' \
     ${IOT2050_DEBIAN_DOCKER_PACKAGES} \
     ' if d.getVar('IOT2050_DOCKER_SUPPORT') == '1' else ''}"
+
+# Custom protocol stack packages (all Debian prebuilt) -> IMAGE_PREINSTALL
+IMAGE_PREINSTALL += " \
+    ${@ d.getVar('IOT2050_META_CUSTOM_PACKAGES') if d.getVar('IOT2050_CUSTOM_SUPPORT') == '1' else ''} \
+    "
 
 IMAGE_INSTALL += " \
     expand-on-first-boot \
