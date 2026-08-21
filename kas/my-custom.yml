@@ -4,3 +4,11 @@ header:
 local_conf_header:
   custom-support: |
     IOT2050_CUSTOM_SUPPORT = "1"
+  kernel-mirror: |
+    # 内核源码下载：cdn.kernel.org 在 runner 上不可达 → 走备用域名（失败自动回退）
+    PREMIRRORS:append = " \
+        https://cdn\.kernel\.org/(.*) https://www\.kernel\.org/\1 \n \
+        https://cdn\.kernel\.org/(.*) https://mirrors\.edge\.kernel\.org/\1 \n \
+        "
+    # 强制 wget 走 IPv4（部分 runner 上 IPv6 路由问题导致 cdn.kernel.org 卡死）
+    FETCHCMD_wget:append = " -4"
