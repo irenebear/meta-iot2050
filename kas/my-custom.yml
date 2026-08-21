@@ -10,5 +10,6 @@ local_conf_header:
         https://cdn\.kernel\.org/(.*) https://www\.kernel\.org/\1 \n \
         https://cdn\.kernel\.org/(.*) https://mirrors\.edge\.kernel\.org/\1 \n \
         "
-    # 强制 wget 走 IPv4（部分 runner 上 IPv6 路由问题导致 cdn.kernel.org 卡死）
-    FETCHCMD_wget:append = " -4"
+    # 强制 wget 走 IPv4 —— 必须完整赋值！Isar 里 FETCHCMD_wget 默认值为空，
+    # 用 :append 会得到只有 " -4" 的命令（exit 127 command not found）
+    FETCHCMD_wget = "/usr/bin/env wget -t 2 -T 30 -4"
